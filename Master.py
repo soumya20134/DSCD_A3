@@ -29,7 +29,6 @@ class Master(master_pb2_grpc.MasterServiceServicer):
     def PassPointsToMapper(self, request, context):
         id = request.id
         c = json.dumps(Centroids)
-        print(c)
         return master_pb2.points(points=DataForMappers[id], centroids=c)
     
 

@@ -12,12 +12,15 @@ class Mapper:
     def __init__(self, data_points, centroids,id):
         self.id = id
         self.data_points = data_points # get from master
-        self.centroids = centroids
+        self.centroids = {}
+        for i in range(len(centroids)):
+            self.centroids[i+1] = centroids[i]
         # {1:[0.4, 7.2], 2:[0.8, 9.8], 3:[-1.5, 7.3],4:[8.1, 3.4]}
         
         with open("points.txt", "r") as file:
             input_data = [list(map(float, line.strip().split(','))) for line in file]
         self.data = input_data[data_points[0]:data_points[1]] # load
+        print(self.data)
         self.output = [] 
     # [[cid,x,y]]
 
@@ -61,6 +64,7 @@ def grpc_message(id):
         response = stub.PassPointsToMapper(request)
         points = response.points
         centroids = json.loads(response.centroids)
+        return points,centroids
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -73,6 +77,7 @@ if __name__ == "__main__":
     
 
     #mapper = Mapper()
-    grpc_message(args.id)
-    # mapper.maps()
+    points,centroids = grpc_message(args.id)
+    mapper = Mapper(points,centroids,args.id)
+    mapper.maps()
 
