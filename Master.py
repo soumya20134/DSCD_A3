@@ -13,20 +13,26 @@ from concurrent import futures
 import master_pb2
 import master_pb2_grpc
 import Mapper
-
-class Master(master_pb2_grpc.MasterServiceServicer):
-    def __init__(self):
-        pass
-
-    def check(self, request, context):
-        message = request.message
-        print(message)
-        return master_pb2.response(message="Message received by the master")
+import json
 
 MAPPERS = 4
 CENTROIDS = 4
 REDUCERS = 4
 ITERATIONS = 100
+DataForMappers = []
+Centroids = []
+
+class Master(master_pb2_grpc.MasterServiceServicer):
+    def __init__(self):
+        pass
+
+    def PassPointsToMapper(self, request, context):
+        id = request.id
+        c = json.dumps(Centroids)
+        print(c)
+        return master_pb2.points(points=DataForMappers[id], centroids=c)
+    
+
 
 def split_data_indexes(data):
     data_size = len(data)
@@ -78,10 +84,10 @@ if __name__ == "__main__":
     DataForMappers = split_data_indexes(input_data)
 
 
-    the_mappers = []
-    for i in range(MAPPERS):
-        mapper = Mapper(DataForMappers[i],Centroids)
-        the_mappers.append[mapper]
+    # the_mappers = []
+    # for i in range(MAPPERS):
+    #     mapper = Mapper(DataForMappers[i],Centroids)
+    #     the_mappers.append[mapper]
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     master_pb2_grpc.add_MasterServiceServicer_to_server(Master(), server)

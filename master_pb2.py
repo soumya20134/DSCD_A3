@@ -14,17 +14,17 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cmaster.proto\"\x1a\n\x07request\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1b\n\x08response\x12\x0f\n\x07message\x18\x01 \x01(\t2-\n\rMasterService\x12\x1c\n\x05\x63heck\x12\x08.request\x1a\t.responseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cmaster.proto\"\x10\n\x02id\x12\n\n\x02id\x18\x01 \x01(\x05\"+\n\x06points\x12\x0e\n\x06points\x18\x01 \x03(\x05\x12\x11\n\tcentroids\x18\x02 \x01(\t23\n\rMasterService\x12\"\n\x12PassPointsToMapper\x12\x03.id\x1a\x07.pointsb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'master_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
-  _globals['_REQUEST']._serialized_start=16
-  _globals['_REQUEST']._serialized_end=42
-  _globals['_RESPONSE']._serialized_start=44
-  _globals['_RESPONSE']._serialized_end=71
-  _globals['_MASTERSERVICE']._serialized_start=73
-  _globals['_MASTERSERVICE']._serialized_end=118
+  _globals['_ID']._serialized_start=16
+  _globals['_ID']._serialized_end=32
+  _globals['_POINTS']._serialized_start=34
+  _globals['_POINTS']._serialized_end=77
+  _globals['_MASTERSERVICE']._serialized_start=79
+  _globals['_MASTERSERVICE']._serialized_end=130
 # @@protoc_insertion_point(module_scope)

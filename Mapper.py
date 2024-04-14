@@ -5,6 +5,7 @@ import master_pb2
 import grpc
 import argparse
 import sys
+import json
 
 class Mapper:
 
@@ -53,11 +54,13 @@ class Mapper:
             with open(partition_file, "w") as file:
                 json.dump(points, file)
 
-    def grpc_message(self):
+def grpc_message(id):
         channel = grpc.insecure_channel('localhost:50051')
         stub = master_pb2_grpc.MasterServiceStub(channel)
-        response = stub.check(master_pb2.request(message="Message from Mapper"))
-        print(response.message)
+        request = master_pb2.id(id=id)
+        response = stub.PassPointsToMapper(request)
+        points = response.points
+        centroids = json.loads(response.centroids)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -69,7 +72,7 @@ if __name__ == "__main__":
 
     
 
-    # mapper = Mapper()
-    # mapper.grpc_message()
+    #mapper = Mapper()
+    grpc_message(args.id)
     # mapper.maps()
 

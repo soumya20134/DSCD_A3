@@ -14,17 +14,17 @@ class MasterServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.check = channel.unary_unary(
-                '/MasterService/check',
-                request_serializer=master__pb2.request.SerializeToString,
-                response_deserializer=master__pb2.response.FromString,
+        self.PassPointsToMapper = channel.unary_unary(
+                '/MasterService/PassPointsToMapper',
+                request_serializer=master__pb2.id.SerializeToString,
+                response_deserializer=master__pb2.points.FromString,
                 )
 
 
 class MasterServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def check(self, request, context):
+    def PassPointsToMapper(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -33,10 +33,10 @@ class MasterServiceServicer(object):
 
 def add_MasterServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'check': grpc.unary_unary_rpc_method_handler(
-                    servicer.check,
-                    request_deserializer=master__pb2.request.FromString,
-                    response_serializer=master__pb2.response.SerializeToString,
+            'PassPointsToMapper': grpc.unary_unary_rpc_method_handler(
+                    servicer.PassPointsToMapper,
+                    request_deserializer=master__pb2.id.FromString,
+                    response_serializer=master__pb2.points.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -49,7 +49,7 @@ class MasterService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def check(request,
+    def PassPointsToMapper(request,
             target,
             options=(),
             channel_credentials=None,
@@ -59,8 +59,8 @@ class MasterService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/MasterService/check',
-            master__pb2.request.SerializeToString,
-            master__pb2.response.FromString,
+        return grpc.experimental.unary_unary(request, target, '/MasterService/PassPointsToMapper',
+            master__pb2.id.SerializeToString,
+            master__pb2.points.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
