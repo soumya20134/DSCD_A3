@@ -3,19 +3,21 @@ import json
 import master_pb2_grpc
 import master_pb2
 import grpc
-
+import argparse
+import sys
 
 class Mapper:
-    data_points = [1,10] # get from master
-    centroids = {1:[0.4, 7.2], 2:[0.8, 9.8], 3:[-1.5, 7.3],4:[8.1, 3.4]}
-    
-    with open("points.txt", "r") as file:
-        input_data = [list(map(float, line.strip().split(','))) for line in file]
 
-    data = input_data[data_points[0]:data_points[1]] # load
-
-    print(data)
-    output = [] 
+    def __init__(self, data_points, centroids,id):
+        self.id = id
+        self.data_points = data_points # get from master
+        self.centroids = centroids
+        # {1:[0.4, 7.2], 2:[0.8, 9.8], 3:[-1.5, 7.3],4:[8.1, 3.4]}
+        
+        with open("points.txt", "r") as file:
+            input_data = [list(map(float, line.strip().split(','))) for line in file]
+        self.data = input_data[data_points[0]:data_points[1]] # load
+        self.output = [] 
     # [[cid,x,y]]
 
     def dist(self,p1,p2):
@@ -57,7 +59,17 @@ class Mapper:
         response = stub.check(master_pb2.request(message="Message from Mapper"))
         print(response.message)
 
-mapper = Mapper()
-mapper.grpc_message()
-# mapper.maps()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--id", help="The id of the mapper", type=int)
+    args = parser.parse_args()
+    if args.id == None:
+        print("id needed")
+        sys.exit(-1)
+
+    
+
+    # mapper = Mapper()
+    # mapper.grpc_message()
+    # mapper.maps()
 

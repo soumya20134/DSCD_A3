@@ -12,6 +12,7 @@ import grpc
 from concurrent import futures
 import master_pb2
 import master_pb2_grpc
+import Mapper
 
 class Master(master_pb2_grpc.MasterServiceServicer):
     def __init__(self):
@@ -75,6 +76,12 @@ if __name__ == "__main__":
     
     Centroids = GenerateCentroids(input_data, CENTROIDS)
     DataForMappers = split_data_indexes(input_data)
+
+
+    the_mappers = []
+    for i in range(MAPPERS):
+        mapper = Mapper(DataForMappers[i],Centroids)
+        the_mappers.append[mapper]
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     master_pb2_grpc.add_MasterServiceServicer_to_server(Master(), server)
