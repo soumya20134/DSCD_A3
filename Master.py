@@ -8,7 +8,19 @@ Other necessary information (This should be reasonable. Please check with us - i
 
 """
 import random
+import grpc
+from concurrent import futures
+import master_pb2
+import master_pb2_grpc
 
+class Master(master_pb2_grpc.MasterServiceServicer):
+    def __init__(self):
+        pass
+
+    def check(self, request, context):
+        message = request.message
+        print(message)
+        return master_pb2.response(message="Message received by the master")
 
 MAPPERS = 4
 CENTROIDS = 4
@@ -64,6 +76,13 @@ if __name__ == "__main__":
     Centroids = GenerateCentroids(input_data, CENTROIDS)
     DataForMappers = split_data_indexes(input_data)
 
-    while(conditionForKMeans):
-        runMapper(DataForMappers, Centroids)
-        Centroids = runReducer()
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    master_pb2_grpc.add_MasterServiceServicer_to_server(Master(), server)
+    server.add_insecure_port('[::]:50051')
+    server.start()
+    server.wait_for_termination()
+    
+
+    # while(conditionForKMeans):
+    #     runMapper(DataForMappers, Centroids)
+    #     Centroids = runReducer()

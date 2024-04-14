@@ -1,5 +1,9 @@
 import math
 import json
+import master_pb2_grpc
+import master_pb2
+import grpc
+
 
 class Mapper:
     data_points = [1,10] # get from master
@@ -47,5 +51,13 @@ class Mapper:
             with open(partition_file, "w") as file:
                 json.dump(points, file)
 
+    def grpc_message(self):
+        channel = grpc.insecure_channel('localhost:50051')
+        stub = master_pb2_grpc.MasterServiceStub(channel)
+        response = stub.check(master_pb2.request(message="Message from Mapper"))
+        print(response.message)
+
 mapper = Mapper()
-mapper.maps()
+mapper.grpc_message()
+# mapper.maps()
+
