@@ -6,6 +6,7 @@ import grpc
 import argparse
 import sys
 import json
+import os
 
 class Mapper:
 
@@ -52,8 +53,15 @@ class Mapper:
         for point in self.output:
             cid = point[0]  # Get centroid ID
             partitions[cid].append(point[1:])  # Append point without the centroid ID
+        
         for cid, points in partitions.items():
-            partition_file = f"partition_{cid}.json"
+            # Create folder if not exists
+            folder_path = f"mapper_{self.id}"
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+            
+            # Save points to a JSON file within the folder
+            partition_file = os.path.join(folder_path, f"partition_{cid}.json")
             with open(partition_file, "w") as file:
                 json.dump(points, file)
 
