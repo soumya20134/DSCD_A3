@@ -67,6 +67,7 @@ class Mapper(mapper_pb2_grpc.MapperServiceServicer):
 
     def SendPartitions(self, request, context):
         id = request.id
+        print(f"Sending partition {id} to reducer")
         c = json.dumps(self.partitions[id])
         return mapper_pb2.pointsResponse(partition=c)
 
@@ -97,8 +98,9 @@ if __name__ == "__main__":
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     mapper_pb2_grpc.add_MapperServiceServicer_to_server(mapper, server)
-    server.add_insecure_port('[::]:50051')
-    #print(f"Mapper {args.id} started on port {port}")
+    port = 50050 + args.id + 1
+    server.add_insecure_port('[::]:'+str(port))
+    print(f"Mapper {args.id} started on port {port}")
     server.start()
     server.wait_for_termination()
 
