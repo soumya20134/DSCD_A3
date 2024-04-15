@@ -19,12 +19,23 @@ class MasterServiceStub(object):
                 request_serializer=master__pb2.id.SerializeToString,
                 response_deserializer=master__pb2.points.FromString,
                 )
+        self.passMtoReducer = channel.unary_unary(
+                '/MasterService/passMtoReducer',
+                request_serializer=master__pb2.id.SerializeToString,
+                response_deserializer=master__pb2.mapperSize.FromString,
+                )
 
 
 class MasterServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def PassPointsToMapper(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def passMtoReducer(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -37,6 +48,11 @@ def add_MasterServiceServicer_to_server(servicer, server):
                     servicer.PassPointsToMapper,
                     request_deserializer=master__pb2.id.FromString,
                     response_serializer=master__pb2.points.SerializeToString,
+            ),
+            'passMtoReducer': grpc.unary_unary_rpc_method_handler(
+                    servicer.passMtoReducer,
+                    request_deserializer=master__pb2.id.FromString,
+                    response_serializer=master__pb2.mapperSize.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -62,5 +78,22 @@ class MasterService(object):
         return grpc.experimental.unary_unary(request, target, '/MasterService/PassPointsToMapper',
             master__pb2.id.SerializeToString,
             master__pb2.points.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def passMtoReducer(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/MasterService/passMtoReducer',
+            master__pb2.id.SerializeToString,
+            master__pb2.mapperSize.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

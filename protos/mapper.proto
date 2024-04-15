@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+service MapperService {
+    rpc SendPartitions(IdRequest) returns (pointsResponse);
+}
+
+message IdRequest {
+    int32 id = 1;
+}
+message pointsResponse {
+    string partition = 1;
+}

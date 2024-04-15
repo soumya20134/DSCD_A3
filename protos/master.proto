@@ -2,6 +2,7 @@ syntax = "proto3";
 
 service MasterService {
     rpc PassPointsToMapper(id) returns (points);
+    rpc passMtoReducer(id) returns (mapperSize);
 }
 
 message id {
@@ -10,4 +11,7 @@ message id {
 message points {
     repeated int32 points = 1;
     string centroids = 2;
+}
+message mapperSize {
+    int32 mapperSize = 1;
 }

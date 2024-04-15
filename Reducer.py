@@ -1,8 +1,17 @@
+import mapper_pb2_grpc
+import mapper_pb2
+import grpc
+import json
+import argparse
+import sys
+import os
+import master_pb2_grpc, master_pb2
+
 class Reducer:
     intermediate_data = [] # TO BE received from the mapper
     sorted_data = None 
     centroids = []
-
+    full_data = []
     output = {}
 
     def __init__(self, centroids, intermediate_data):
@@ -50,3 +59,41 @@ class Reducer:
         self.output = self.reduce(inputData)
 
         return self.output
+
+
+
+def grpc_message(id):
+        channel = grpc.insecure_channel('localhost:50050')
+        stub = master_pb2_grpc.MasterServiceStub(channel)
+        request = master_pb2.id(id=id)
+        response = stub.passMtoReducer(request)
+        mapper = response.mapperSize
+        return mapper
+
+def grpc_message2(id,m):
+    data_ = []
+    for i in range(m):
+        port = 50050 + i + 1
+        channel = grpc.insecure_channel('localhost:'+str(port))
+        stub = mapper_pb2_grpc.MapperServiceStub(channel)
+        request = mapper_pb2.IdRequest(id=id)
+        response = stub.SendPartitions(request)
+        data = json.loads(response.partition)
+        data_.append(data)
+    
+    return data_
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--id", help="The id of the mapper", type=int)
+    args = parser.parse_args()
+    if args.id == None:
+        print("id needed")
+        sys.exit(-1)
+
+    
+    m = grpc_message(args.id)
+    print("m",m)
+    data = grpc_message2(args.id,m)
+    print("data",data)

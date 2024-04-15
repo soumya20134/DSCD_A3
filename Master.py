@@ -31,6 +31,10 @@ class Master(master_pb2_grpc.MasterServiceServicer):
         c = json.dumps(Centroids)
         return master_pb2.points(points=DataForMappers[id], centroids=c)
     
+    def passMtoReducer(self, request, context):
+        id = request.id
+        return master_pb2.mapperSize(mappers=MAPPERS)
+    
 
 
 def split_data_indexes(data):
@@ -90,7 +94,7 @@ if __name__ == "__main__":
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     master_pb2_grpc.add_MasterServiceServicer_to_server(Master(), server)
-    server.add_insecure_port('[::]:50051')
+    server.add_insecure_port('[::]:50050')
     server.start()
     server.wait_for_termination()
     

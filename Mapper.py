@@ -7,10 +7,14 @@ import argparse
 import sys
 import json
 import os
+import mapper_pb2
+import mapper_pb2_grpc
+from concurrent import futures
 
-class Mapper:
+class Mapper(mapper_pb2_grpc.MapperServiceServicer):
 
     def __init__(self, data_points, centroids,id):
+        self.partitions = {}
         self.id = id
         self.data_points = data_points # get from master
         self.centroids = {}
@@ -21,7 +25,6 @@ class Mapper:
         with open("points.txt", "r") as file:
             input_data = [list(map(float, line.strip().split(','))) for line in file]
         self.data = input_data[data_points[0]:data_points[1]] # load
-        print(self.data)
         self.output = [] 
     # [[cid,x,y]]
 
@@ -36,25 +39,22 @@ class Mapper:
             mapped_c = None
             for c in self.centroids:
                 dist = min(self.dist(point,self.centroids[c]),min_dist)
-                print(dist)
                 if(dist < min_dist):
                     min_dist = dist
                     mapped_c = c
             
             point.insert(0, mapped_c)
             self.output.append(point)
-            print(self.output)
-            self.partition()
+        self.partition()
 
     def partition(self):
-        partitions = {}
         for c in self.centroids:
-            partitions[c] = []
+            self.partitions[c] = []
         for point in self.output:
             cid = point[0]  # Get centroid ID
-            partitions[cid].append(point[1:])  # Append point without the centroid ID
+            self.partitions[cid].append(point[1:])  # Append point without the centroid ID
         
-        for cid, points in partitions.items():
+        for cid, points in self.partitions.items():
             # Create folder if not exists
             folder_path = f"mapper_{self.id}"
             if not os.path.exists(folder_path):
@@ -65,14 +65,20 @@ class Mapper:
             with open(partition_file, "w") as file:
                 json.dump(points, file)
 
+    def SendPartitions(self, request, context):
+        id = request.id
+        c = json.dumps(self.partitions[id])
+        return mapper_pb2.pointsResponse(partition=c)
+
 def grpc_message(id):
-        channel = grpc.insecure_channel('localhost:50051')
+        channel = grpc.insecure_channel('localhost:50050')
         stub = master_pb2_grpc.MasterServiceStub(channel)
         request = master_pb2.id(id=id)
         response = stub.PassPointsToMapper(request)
         points = response.points
         centroids = json.loads(response.centroids)
         return points,centroids
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -83,9 +89,13 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     
-
-    #mapper = Mapper()
     points,centroids = grpc_message(args.id)
     mapper = Mapper(points,centroids,args.id)
     mapper.maps()
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    mapper_pb2_grpc.add_MapperServiceServicer_to_server(mapper, server)
+    port = 50050 + args.id + 1
+    server.add_insecure_port('[::]:'+str(port))
+    server.start()
+    server.wait_for_termination()
 
