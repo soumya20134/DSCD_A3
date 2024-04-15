@@ -66,22 +66,33 @@ def grpc_message(id):
         channel = grpc.insecure_channel('localhost:50050')
         stub = master_pb2_grpc.MasterServiceStub(channel)
         request = master_pb2.id(id=id)
-        response = stub.passMtoReducer(request)
-        mapper = response.mapperSize
+        response = stub.PassMappersToReducers(request)
+        print("received data from master")
+        mapper = response.mappers
         return mapper
 
-def grpc_message2(id,m):
-    data_ = []
-    for i in range(m):
-        port = 50050 + i + 1
-        channel = grpc.insecure_channel('localhost:'+str(port))
-        stub = mapper_pb2_grpc.MapperServiceStub(channel)
-        request = mapper_pb2.IdRequest(id=id)
-        response = stub.SendPartitions(request)
-        data = json.loads(response.partition)
-        data_.append(data)
+# def grpc_message2(id,m):
+#     data_ = []
+#     # for i in range(m):
+#     port = 50050 + 0 + 1
+#     channel = grpc.insecure_channel('localhost:50051')
+#     stub = mapper_pb2_grpc.MapperServiceStub(channel)
+#     request = mapper_pb2.IdRequest(id=id)
+#     response = stub.SendPartitions(request)
+#     print("received data from mapper")
+#     data = json.loads(response.partition)
+#     data_.append(data)
     
-    return data_
+#     return data_
+
+def recieve_data():
+    channel = grpc.insecure_channel('localhost:50051')
+    stub = mapper_pb2_grpc.MapperServiceStub(channel)
+    request = mapper_pb2.IdRequest(id=1)
+    response = stub.SendPartitions(request)
+    print("received data from mapper")
+    data = json.loads(response.partition)
+    return data
 
 
 if __name__ == "__main__":
@@ -95,5 +106,5 @@ if __name__ == "__main__":
     
     m = grpc_message(args.id)
     print("m",m)
-    data = grpc_message2(args.id,m)
+    data = recieve_data()
     print("data",data)

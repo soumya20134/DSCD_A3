@@ -75,6 +75,7 @@ def grpc_message(id):
         stub = master_pb2_grpc.MasterServiceStub(channel)
         request = master_pb2.id(id=id)
         response = stub.PassPointsToMapper(request)
+        print("received data from master")
         points = response.points
         centroids = json.loads(response.centroids)
         return points,centroids
@@ -92,10 +93,12 @@ if __name__ == "__main__":
     points,centroids = grpc_message(args.id)
     mapper = Mapper(points,centroids,args.id)
     mapper.maps()
+
+
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     mapper_pb2_grpc.add_MapperServiceServicer_to_server(mapper, server)
-    port = 50050 + args.id + 1
-    server.add_insecure_port('[::]:'+str(port))
+    server.add_insecure_port('[::]:50051')
+    #print(f"Mapper {args.id} started on port {port}")
     server.start()
     server.wait_for_termination()
 

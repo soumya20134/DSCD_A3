@@ -29,11 +29,14 @@ class Master(master_pb2_grpc.MasterServiceServicer):
     def PassPointsToMapper(self, request, context):
         id = request.id
         c = json.dumps(Centroids)
+        print("Mapper ", id," initialized. Sending data to mapper.")
         return master_pb2.points(points=DataForMappers[id], centroids=c)
     
-    def passMtoReducer(self, request, context):
+    def PassMappersToReducers(self, request, context):
         id = request.id
-        return master_pb2.mapperSize(mappers=MAPPERS)
+        print("Reducer ", id," initialized. Sending data to reducer.")
+        return master_pb2.mapperResponse(mappers=MAPPERS)
+
     
 
 
@@ -87,14 +90,11 @@ if __name__ == "__main__":
     DataForMappers = split_data_indexes(input_data)
 
 
-    # the_mappers = []
-    # for i in range(MAPPERS):
-    #     mapper = Mapper(DataForMappers[i],Centroids)
-    #     the_mappers.append[mapper]
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     master_pb2_grpc.add_MasterServiceServicer_to_server(Master(), server)
     server.add_insecure_port('[::]:50050')
+    print("Starting master. Listening on port 50050")
     server.start()
     server.wait_for_termination()
     
