@@ -15,9 +15,9 @@ import master_pb2_grpc
 import Mapper
 import json
 
-MAPPERS = 4
-CENTROIDS = 4
-REDUCERS = 4
+MAPPERS = 2
+CENTROIDS = 2
+REDUCERS = 2
 ITERATIONS = 100
 DataForMappers = []
 Centroids = []
@@ -36,6 +36,12 @@ class Master(master_pb2_grpc.MasterServiceServicer):
         id = request.id
         print("Reducer ", id," initialized. Sending data to reducer.")
         return master_pb2.mapperResponse(mappers=MAPPERS)
+    
+    def RecieveCentroid(self, request, context):
+        updated_centroid = request.updated_centroid
+        id = request.id
+        print(updated_centroid, id)
+        return master_pb2.messageResponse()
 
     
 

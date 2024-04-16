@@ -8,15 +8,11 @@ import os
 import master_pb2_grpc, master_pb2
 
 class Reducer:
-    intermediate_data = [] # TO BE received from the mapper
-    sorted_data = None 
-    centroids = []
-    full_data = []
-    output = {}
 
-    def __init__(self, centroids, intermediate_data):
-        self.centroids = centroids
+    def __init__(self,intermediate_data,id):
+        self.id = id
         self.intermediate_data = intermediate_data
+        self.output = {}
 
     def dist():
         pass
@@ -30,20 +26,21 @@ class Reducer:
         self.sorted_data = sorted(self.intermediate_data, key = lambda x: x[0])
 
 
-    def reduce(self, inputData):
+    def reduce(self):
         
         # just calculate the centroid of all the points in that dictionary 
         # return (centroid id : updated_val)
-
-        for key in inputData:
-            x = 0
-            y = 0
-            for i in inputData[key]:
-                x += i[0]
-                y += i[1]
-            x = x / len(inputData[key])
-            y = y / len(inputData[key])
-            self.output[key] = [x, y]
+        inputData = self.intermediate_data
+        x = 0
+        y = 0
+        for point in inputData:
+            x += point[0]
+            y += point[1]
+        x = x / len(inputData)
+        y = y / len(inputData)
+        self.output[self.id] = [x, y]
+        print("output",self.output[self.id])
+        return self.output[self.id]
 
 
 # the output must be communicated to the master
@@ -71,6 +68,13 @@ def grpc_message(id):
         mapper = response.mappers
         return mapper
 
+def grpc_Send_centroid(updated_centroid,id):
+        channel = grpc.insecure_channel('localhost:50050')
+        stub = master_pb2_grpc.MasterServiceStub(channel)
+        request = master_pb2.reduce_update(updated_centroid=updated_centroid,id=id)
+        response = stub.RecieveCentroid(request)
+        print(response.message)
+
 def recieve_data(mappers):
     final_data = []
     print(final_data)
@@ -82,7 +86,7 @@ def recieve_data(mappers):
         response = stub.SendPartitions(request)
         print("received data from mapper")
         data = json.loads(response.partition)
-        final_data.append(data)
+        final_data.extend(data)
 
     return final_data
 
@@ -98,4 +102,8 @@ if __name__ == "__main__":
     
     m = grpc_message(args.id)
     data = recieve_data(m)
-    print(data)
+    reducer = Reducer(data,args.id)
+    updated_centroid = reducer.reduce()
+    grpc_Send_centroid(str(updated_centroid),args.id)
+
+    # print(data)
