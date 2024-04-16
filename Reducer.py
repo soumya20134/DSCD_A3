@@ -6,8 +6,11 @@ import argparse
 import sys
 import os
 import master_pb2_grpc, master_pb2
+from concurrent import futures
+import reducer_pb2
+import reducer_pb2_grpc
 
-class Reducer:
+class Reducer(reducer_pb2_grpc.ReducerServiceServicer):
 
     def __init__(self,intermediate_data,id):
         self.id = id
@@ -56,6 +59,13 @@ class Reducer:
         self.output = self.reduce(inputData)
 
         return self.output
+    
+    def SendCentroid(self, request, context):
+        id = request.id
+        print(f"Sending centroid {id} to master")
+        print(self.output)
+        c = str(self.output[id])
+        return reducer_pb2.reduce_update(updated_centroid=c,id=self.id)
 
 
 
@@ -67,13 +77,6 @@ def grpc_message(id):
         print("received data from master")
         mapper = response.mappers
         return mapper
-
-def grpc_Send_centroid(updated_centroid,id):
-        channel = grpc.insecure_channel('localhost:50050')
-        stub = master_pb2_grpc.MasterServiceStub(channel)
-        request = master_pb2.reduce_update(updated_centroid=updated_centroid,id=id)
-        response = stub.RecieveCentroid(request)
-        print(response.message)
 
 def recieve_data(mappers):
     final_data = []
@@ -104,6 +107,12 @@ if __name__ == "__main__":
     data = recieve_data(m)
     reducer = Reducer(data,args.id)
     updated_centroid = reducer.reduce()
-    grpc_Send_centroid(str(updated_centroid),args.id)
-
     # print(data)
+
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    reducer_pb2_grpc.add_ReducerServiceServicer_to_server(reducer, server)
+    port = 50060 + args.id + 1
+    server.add_insecure_port('[::]:'+str(port))
+    print(f"Reducer {args.id} started on port {port}")
+    server.start()
+    server.wait_for_termination()

@@ -3,16 +3,8 @@ syntax = "proto3";
 service MasterService {
     rpc PassPointsToMapper(id) returns (points);
     rpc PassMappersToReducers(id) returns (mapperResponse);
-    rpc RecieveCentroid(reduce_update) returns (messageResponse);
 }
 
-message reduce_update{
-    string updated_centroid = 1;
-    int32 id = 2;
-}
-message messageResponse{
-    string message = 1;
-}
 message id {
     int32 id = 1;
 }

@@ -14,6 +14,9 @@ import master_pb2
 import master_pb2_grpc
 import Mapper
 import json
+import reducer_pb2
+import reducer_pb2_grpc
+import time
 
 MAPPERS = 2
 CENTROIDS = 2
@@ -37,13 +40,23 @@ class Master(master_pb2_grpc.MasterServiceServicer):
         print("Reducer ", id," initialized. Sending data to reducer.")
         return master_pb2.mapperResponse(mappers=MAPPERS)
     
-    def RecieveCentroid(self, request, context):
-        updated_centroid = request.updated_centroid
-        id = request.id
-        print(updated_centroid, id)
-        return master_pb2.messageResponse()
 
-    
+def recieve_data():
+    time.sleep(20)
+    final_data = []
+    for i in range(REDUCERS):
+        port = 50060 + i + 1
+        channel = grpc.insecure_channel('localhost:'+str(port))
+        stub = reducer_pb2_grpc.ReducerServiceStub(channel)
+        request = reducer_pb2.messageRequest(id=i)
+        response = stub.SendCentroid(request)
+        print("received centroid from reducer")
+        data = response.updated_centroid
+        data = list(data)
+        print(data)
+        final_data.extend(data)
+
+    return final_data
 
 
 def split_data_indexes(data):
@@ -102,7 +115,12 @@ if __name__ == "__main__":
     server.add_insecure_port('[::]:50050')
     print("Starting master. Listening on port 50050")
     server.start()
+
+    final_data = recieve_data()
+
     server.wait_for_termination()
+
+    print("helo")
     
 
     # while(conditionForKMeans):

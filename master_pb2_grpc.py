@@ -24,11 +24,6 @@ class MasterServiceStub(object):
                 request_serializer=master__pb2.id.SerializeToString,
                 response_deserializer=master__pb2.mapperResponse.FromString,
                 )
-        self.RecieveCentroid = channel.unary_unary(
-                '/MasterService/RecieveCentroid',
-                request_serializer=master__pb2.reduce_update.SerializeToString,
-                response_deserializer=master__pb2.messageResponse.FromString,
-                )
 
 
 class MasterServiceServicer(object):
@@ -46,12 +41,6 @@ class MasterServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def RecieveCentroid(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
 
 def add_MasterServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -64,11 +53,6 @@ def add_MasterServiceServicer_to_server(servicer, server):
                     servicer.PassMappersToReducers,
                     request_deserializer=master__pb2.id.FromString,
                     response_serializer=master__pb2.mapperResponse.SerializeToString,
-            ),
-            'RecieveCentroid': grpc.unary_unary_rpc_method_handler(
-                    servicer.RecieveCentroid,
-                    request_deserializer=master__pb2.reduce_update.FromString,
-                    response_serializer=master__pb2.messageResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -111,22 +95,5 @@ class MasterService(object):
         return grpc.experimental.unary_unary(request, target, '/MasterService/PassMappersToReducers',
             master__pb2.id.SerializeToString,
             master__pb2.mapperResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def RecieveCentroid(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/MasterService/RecieveCentroid',
-            master__pb2.reduce_update.SerializeToString,
-            master__pb2.messageResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

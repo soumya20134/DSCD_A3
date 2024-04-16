@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+service ReducerService {
+    rpc SendCentroid(messageRequest) returns (reduce_update);
+}
+
+message messageRequest {
+    int32 id = 1;
+}
+message reduce_update{
+    string updated_centroid = 1;
+    int32 id = 2;
+}
