@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cmapper.proto\"\x17\n\tIdRequest\x12\n\n\x02id\x18\x01 \x01(\x05\"#\n\x0epointsResponse\x12\x11\n\tpartition\x18\x01 \x01(\t2>\n\rMapperService\x12-\n\x0eSendPartitions\x12\n.IdRequest\x1a\x0f.pointsResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cmapper.proto\"\x17\n\tIdRequest\x12\n\n\x02id\x18\x01 \x01(\x05\"#\n\x0epointsResponse\x12\x11\n\tpartition\x18\x01 \x01(\t\"=\n\x15\x63\x65ntroidUpdateRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x18\n\x10updated_centroid\x18\x02 \x01(\t\"\x11\n\x03\x61\x63k\x12\n\n\x02id\x18\x01 \x01(\x05\x32v\n\rMapperService\x12-\n\x0eSendPartitions\x12\n.IdRequest\x1a\x0f.pointsResponse\x12\x36\n\x16ReceiveUpdatedCentroid\x12\x16.centroidUpdateRequest\x1a\x04.ackb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -25,6 +25,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_IDREQUEST']._serialized_end=39
   _globals['_POINTSRESPONSE']._serialized_start=41
   _globals['_POINTSRESPONSE']._serialized_end=76
-  _globals['_MAPPERSERVICE']._serialized_start=78
-  _globals['_MAPPERSERVICE']._serialized_end=140
+  _globals['_CENTROIDUPDATEREQUEST']._serialized_start=78
+  _globals['_CENTROIDUPDATEREQUEST']._serialized_end=139
+  _globals['_ACK']._serialized_start=141
+  _globals['_ACK']._serialized_end=158
+  _globals['_MAPPERSERVICE']._serialized_start=160
+  _globals['_MAPPERSERVICE']._serialized_end=278
 # @@protoc_insertion_point(module_scope)

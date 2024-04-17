@@ -17,11 +17,13 @@ import json
 import reducer_pb2
 import reducer_pb2_grpc
 import time
+import mapper_pb2
+import mapper_pb2_grpc
 
 MAPPERS = 2
 CENTROIDS = 2
 REDUCERS = 2
-ITERATIONS = 100
+ITERATIONS = 1
 DataForMappers = []
 Centroids = []
 
@@ -42,21 +44,33 @@ class Master(master_pb2_grpc.MasterServiceServicer):
     
 
 def recieve_data():
-    time.sleep(20)
     final_data = []
-    for i in range(REDUCERS):
-        port = 50060 + i + 1
-        channel = grpc.insecure_channel('localhost:'+str(port))
-        stub = reducer_pb2_grpc.ReducerServiceStub(channel)
-        request = reducer_pb2.messageRequest(id=i)
-        response = stub.SendCentroid(request)
-        print("received centroid from reducer")
-        data = response.updated_centroid
-        data = list(data)
-        print(data)
-        final_data.extend(data)
+    received_ports = set()
+    while len(received_ports) != REDUCERS:
+        try:
+            for i in range(REDUCERS):
+                port = 50060 + i + 1
+                if port in received_ports:
+                    continue
+                channel = grpc.insecure_channel('localhost:'+str(port))
+                stub = reducer_pb2_grpc.ReducerServiceStub(channel)
+                request = reducer_pb2.messageRequest(id=i)
+                response = stub.SendCentroid(request)
+                id = str(response.id)
+                print("received centroid from reducer ",id)
+                received_ports.add(port)
+                data = response.updated_centroid
+                data = json.loads(data)
+                
+                print(data[id])
+                final_data.extend(data[id])
 
-    return final_data
+            return final_data
+        except Exception as e:
+            time.sleep(1)
+            continue
+
+    
 
 
 def split_data_indexes(data):
@@ -116,13 +130,30 @@ if __name__ == "__main__":
     print("Starting master. Listening on port 50050")
     server.start()
 
-    final_data = recieve_data()
+    updated_centroids = recieve_data()
+    print(updated_centroids, "updated centroids in master")
+    while(ITERATIONS > 0):
+        for i in range(MAPPERS):
+            # send the updated centroid and their data split to the mappers
+            port = 50050 + i + 1
+            channel = grpc.insecure_channel('localhost:'+str(port))
+            stub = mapper_pb2_grpc.MapperServiceStub(channel)
+            request = mapper_pb2.centroidUpdateRequest(id=i, updated_centroid=json.dumps(updated_centroids))
+            response = stub.ReceiveUpdatedCentroid(request)
+            print("Sent updated centroid to mapper ",response.id,"for iteration ",ITERATIONS)
+
+        #receive the updated centroids from the reducers
+        #check if the updated centroids are the same as the previous centroids, if yes, break
+        
+        ITERATIONS -= 1
+    #     runMapper(DataForMappers, Centroids)
+    #     Centroids = runReducer()
+
+
+    
 
     server.wait_for_termination()
 
-    print("helo")
     
 
-    # while(conditionForKMeans):
-    #     runMapper(DataForMappers, Centroids)
-    #     Centroids = runReducer()
+   

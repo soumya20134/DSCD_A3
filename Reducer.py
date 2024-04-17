@@ -63,8 +63,7 @@ class Reducer(reducer_pb2_grpc.ReducerServiceServicer):
     def SendCentroid(self, request, context):
         id = request.id
         print(f"Sending centroid {id} to master")
-        print(self.output)
-        c = str(self.output[id])
+        c= json.dumps(self.output)
         return reducer_pb2.reduce_update(updated_centroid=c,id=self.id)
 
 
@@ -87,7 +86,7 @@ def recieve_data(mappers):
         stub = mapper_pb2_grpc.MapperServiceStub(channel)
         request = mapper_pb2.IdRequest(id=args.id+1)
         response = stub.SendPartitions(request)
-        print("received data from mapper")
+        print("received data from mapper ")
         data = json.loads(response.partition)
         final_data.extend(data)
 
@@ -103,8 +102,8 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     
-    m = grpc_message(args.id)
-    data = recieve_data(m)
+    numberofmappers = grpc_message(args.id)
+    data = recieve_data(numberofmappers)
     reducer = Reducer(data,args.id)
     updated_centroid = reducer.reduce()
     # print(data)

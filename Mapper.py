@@ -70,6 +70,14 @@ class Mapper(mapper_pb2_grpc.MapperServiceServicer):
         print(f"Sending partition {id} to reducer")
         c = json.dumps(self.partitions[id])
         return mapper_pb2.pointsResponse(partition=c)
+    
+    def ReceiveUpdatedCentroid(self, request, context):
+        id = request.id
+        updated_centroids = json.loads(request.updated_centroid)
+        print(f"Received updated centroid",updated_centroids)
+        self.centroids = updated_centroids
+        return mapper_pb2.ack(id=id)
+
 
 def grpc_message(id):
         channel = grpc.insecure_channel('localhost:50050')

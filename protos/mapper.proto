@@ -2,6 +2,7 @@ syntax = "proto3";
 
 service MapperService {
     rpc SendPartitions(IdRequest) returns (pointsResponse);
+    rpc ReceiveUpdatedCentroid(centroidUpdateRequest) returns (ack);
 }
 
 message IdRequest {
@@ -9,4 +10,11 @@ message IdRequest {
 }
 message pointsResponse {
     string partition = 1;
+}
+message centroidUpdateRequest {
+    int32 id = 1;
+    string updated_centroid = 2;
+}
+message ack {
+    int32 id = 1;
 }
